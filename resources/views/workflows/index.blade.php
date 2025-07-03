@@ -17,8 +17,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Scope</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Steps</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type</th>
-
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Behavior</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
@@ -37,22 +36,32 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ $workflow->document_types_count }}</td>
-<td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-    @if($workflow->is_reopenable)
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-cyan-100 text-cyan-800">Re-openable</span>
-    @else
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800">One-time</span>
-    @endif
-</td>
-
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex flex-wrap gap-1">
+                                        @if($workflow->is_reopenable)
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-cyan-100 text-cyan-800">Reopenable</span>
+                                        @else
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800">One-time</span>
+                                        @endif
+                                        
+                                        @if($workflow->auto_reopen_on_expiry)
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Auto-reopen on expiry</span>
+                                        @endif
+                                        
+                                        @if($workflow->auto_reopen_on_deletion)
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Auto-reopen on deletion</span>
+                                        @endif
+                                    </div>
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <a href="{{ route('workflows.edit', $workflow) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                    {{-- ... delete form ... --}}
+                                    <a href="{{ route('workflows.history', $workflow) }}" class="text-green-600 hover:text-green-900 ml-3">History</a>
+                                    <a href="{{ route('workflows.statistics', $workflow) }}" class="text-blue-600 hover:text-blue-900 ml-3">Stats</a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-12 text-center text-slate-500">No workflows found.</td>
+                                <td colspan="6" class="px-6 py-12 text-center text-slate-500">No workflows found.</td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -57,48 +57,50 @@ Route::middleware('auth')->group(function () {
     Route::post('workflows/{workflow}/steps', [WorkflowStepController::class, 'store'])->name('workflows.steps.store');
     Route::delete('workflow-steps/{step}', [WorkflowStepController::class, 'destroy'])->name('workflows.steps.destroy');
 
+    // Additional workflow routes
+    Route::get('workflows/{workflow}/history', [WorkflowController::class, 'history'])->name('workflows.history');
+    Route::get('workflows/{workflow}/statistics', [WorkflowController::class, 'statistics'])->name('workflows.statistics');
+
+    Route::get('process-workflow', [ProcessWorkflowController::class, 'create'])->name('process-workflow.create');
+    Route::post('process-workflow', [ProcessWorkflowController::class, 'show'])->name('process-workflow.show');
 
 
-Route::get('process-workflow', [ProcessWorkflowController::class, 'create'])->name('process-workflow.create');
-Route::post('process-workflow', [ProcessWorkflowController::class, 'show'])->name('process-workflow.show');
-
-
-Route::get('projects/{project}/team', [ProjectTeamController::class, 'index'])->name('projects.team.index');
-Route::post('projects/{project}/team', [ProjectTeamController::class, 'store'])->name('projects.team.store');
-Route::delete('projects/{project}/team/{employee}', [ProjectTeamController::class, 'destroy'])->name('projects.team.destroy');
-
-
-
-Route::get('/employees/{employee}/relevant-workflows', [WorkflowApiController::class, 'getRelevantWorkflows'])
-     ->name('api.employees.workflows');
+    Route::get('projects/{project}/team', [ProjectTeamController::class, 'index'])->name('projects.team.index');
+    Route::post('projects/{project}/team', [ProjectTeamController::class, 'store'])->name('projects.team.store');
+    Route::delete('projects/{project}/team/{employee}', [ProjectTeamController::class, 'destroy'])->name('projects.team.destroy');
 
 
 
-Route::get('reports/expiring-documents', [ReportController::class, 'expiringDocumentsForm'])->name('reports.expiring-documents.form');
-Route::get('reports/generate/expiring-documents', [ReportController::class, 'generateExpiringDocumentsReport'])->name('reports.expiring-documents.generate');
+    Route::get('/employees/{employee}/relevant-workflows', [WorkflowApiController::class, 'getRelevantWorkflows'])
+        ->name('api.employees.workflows');
 
 
 
-
-
-
-Route::get('in-progress-workflows', [InProgressWorkflowController::class, 'index'])->name('workflows.in-progress');
-
-
-
-Route::get('process-workflow/start', [ProcessWorkflowController::class, 'create'])->name('process-workflow.create');
-Route::get('employees/{employee}/workflows/{workflow}', [ProcessWorkflowController::class, 'show'])->name('process-workflow.show');
-Route::post('process-workflow/show', [ProcessWorkflowController::class, 'redirectToShow'])->name('process-workflow.redirect');
-// API route for dynamic filtering
-Route::get('/employees/{employee}/relevant-workflows', [WorkflowApiController::class, 'getRelevantWorkflows'])->name('api.employees.workflows');
+    Route::get('reports/expiring-documents', [ReportController::class, 'expiringDocumentsForm'])->name('reports.expiring-documents.form');
+    Route::get('reports/generate/expiring-documents', [ReportController::class, 'generateExpiringDocumentsReport'])->name('reports.expiring-documents.generate');
 
 
 
 
 
-Route::resource('document-templates', DocumentTemplateController::class);
 
-Route::resource('users', UserController::class)->middleware('can:admin');
+    Route::get('in-progress-workflows', [InProgressWorkflowController::class, 'index'])->name('workflows.in-progress');
+
+
+
+    Route::get('process-workflow/start', [ProcessWorkflowController::class, 'create'])->name('process-workflow.create');
+    Route::get('employees/{employee}/workflows/{workflow}', [ProcessWorkflowController::class, 'show'])->name('process-workflow.show');
+    Route::post('process-workflow/show', [ProcessWorkflowController::class, 'redirectToShow'])->name('process-workflow.redirect');
+    // API route for dynamic filtering
+    Route::get('/employees/{employee}/relevant-workflows', [WorkflowApiController::class, 'getRelevantWorkflows'])->name('api.employees.workflows');
+
+
+
+
+
+    Route::resource('document-templates', DocumentTemplateController::class);
+
+    Route::resource('users', UserController::class)->middleware('can:admin');
 
 
 

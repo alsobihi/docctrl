@@ -12,7 +12,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Check for expired documents daily at midnight
+        $schedule->command('documents:check-expired')->dailyAt('00:01');
+        
+        // Send workflow notifications daily at 8 AM
+        $schedule->command('workflows:send-notifications')->dailyAt('08:00');
     }
 
     /**

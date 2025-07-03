@@ -198,6 +198,7 @@ class Employee extends Model
     /**
      * Checks all in-progress workflows for this employee and updates their
      * status to 'completed' if all required documents are now present.
+     * Also creates history records for workflow status changes.
      */
     public function checkAndUpdateWorkflowStatus(): void
     {
@@ -216,11 +217,58 @@ class Employee extends Model
             $requiredIds = $employeeWorkflow->workflow->documentTypes->pluck('id');
 
             if ($requiredIds->diff($currentDocumentIds)->isEmpty()) {
+                // All required documents are present - complete the workflow
                 $employeeWorkflow->update([
                     'status' => 'completed',
                     'completed_at' => Carbon::now(),
                 ]);
+                
+                // Create a history record for workflow completion
+                WorkflowHistory::create([
+                    'workflow_id' => $employeeWorkflow->workflow_id,
+                    'employee_id' => $this->id,
+                    'employee_workflow_id' => $employeeWorkflow->id,
+                    'action' => 'completed',
+                    'details' => 'All required documents have been collected',
+                    'created_by' => $employeeWorkflow->created_by,
+                ]);
             }
+        }
+    }
+
+    /**
+     * Check for expired documents and reopen relevant workflows if needed
+     */
+    public function checkForExpiredDocuments(): void
+    {
+        $expiredDocuments = $this->documents()
+            ->where('expiry_date', '<=', now())
+            ->whereDoesntHave('expiryNotifications')
+            ->with('documentType')
+            ->get();
+            
+        foreach ($expiredDocuments as $document) {
+            if (!$document->documentType) {
+                continue;
+            }
+            
+            // Create history record for document expiration
+            WorkflowHistory::create([
+                'employee_id' => $this->id,
+                'action' => 'document_expired',
+                'details' => "{$document->documentType->name} expired on {$document->expiry_date->format('Y-m-d')}",
+                'document_type_id' => $document->document_type_id,
+                'document_id' => $document->id,
+            ]);
+            
+            // Check if any completed workflows need to be reopened
+            Workflow::reopenWorkflowsForDocument($this, $document->documentType, 'expired');
+            
+            // Mark that we've processed this expiry
+            $document->expiryNotifications()->create([
+                'notification_type' => 'expired',
+                'notified_at' => now(),
+            ]);
         }
     }
 }
