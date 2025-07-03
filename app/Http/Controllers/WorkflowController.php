@@ -30,7 +30,7 @@ class WorkflowController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'scope' => ['required', Rule::in(['global', 'plant', 'project'])],
@@ -42,20 +42,26 @@ class WorkflowController extends Controller
             'notification_days_before' => 'nullable|integer|min:1|max:90',
         ]);
 
-        $workflow = Workflow::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'is_reopenable' => $request->boolean('is_reopenable'),
-            'auto_reopen_on_expiry' => $request->boolean('auto_reopen_on_expiry'),
-            'auto_reopen_on_deletion' => $request->boolean('auto_reopen_on_deletion'),
-            'notification_days_before' => $request->notification_days_before,
-            'plant_id' => $request->scope === 'plant' ? $request->plant_id : null,
-            'project_id' => $request->scope === 'project' ? $request->project_id : null,
-            'created_by' => Auth::id(),
-        ]);
+        try {
+            $workflow = Workflow::create([
+                'name' => $request->name,
+                'description' => $request->description,
+                'is_reopenable' => $request->boolean('is_reopenable'),
+                'auto_reopen_on_expiry' => $request->boolean('auto_reopen_on_expiry'),
+                'auto_reopen_on_deletion' => $request->boolean('auto_reopen_on_deletion'),
+                'notification_days_before' => $request->notification_days_before,
+                'plant_id' => $request->scope === 'plant' ? $request->plant_id : null,
+                'project_id' => $request->scope === 'project' ? $request->project_id : null,
+                'created_by' => Auth::id(),
+            ]);
 
-        return redirect()->route('workflows.edit', $workflow)
-                        ->with('success', 'Workflow created successfully.');
+            return redirect()->route('workflows.edit', $workflow)
+                            ->with('success', 'Workflow created successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                            ->withInput()
+                            ->withErrors(['error' => 'Failed to create workflow: ' . $e->getMessage()]);
+        }
     }
 
     public function edit(Workflow $workflow): View
@@ -71,7 +77,7 @@ class WorkflowController extends Controller
 
     public function update(Request $request, Workflow $workflow): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'scope' => ['required', Rule::in(['global', 'plant', 'project'])],
@@ -83,41 +89,52 @@ class WorkflowController extends Controller
             'notification_days_before' => 'nullable|integer|min:1|max:90',
         ]);
 
-        $workflow->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'is_reopenable' => $request->boolean('is_reopenable'),
-            'auto_reopen_on_expiry' => $request->boolean('auto_reopen_on_expiry'),
-            'auto_reopen_on_deletion' => $request->boolean('auto_reopen_on_deletion'),
-            'notification_days_before' => $request->notification_days_before,
-            'plant_id' => $request->scope === 'plant' ? $request->plant_id : null,
-            'project_id' => $request->scope === 'project' ? $request->project_id : null,
-            'updated_by' => Auth::id(),
-        ]);
+        try {
+            $workflow->update([
+                'name' => $request->name,
+                'description' => $request->description,
+                'is_reopenable' => $request->boolean('is_reopenable'),
+                'auto_reopen_on_expiry' => $request->boolean('auto_reopen_on_expiry'),
+                'auto_reopen_on_deletion' => $request->boolean('auto_reopen_on_deletion'),
+                'notification_days_before' => $request->notification_days_before,
+                'plant_id' => $request->scope === 'plant' ? $request->plant_id : null,
+                'project_id' => $request->scope === 'project' ? $request->project_id : null,
+                'updated_by' => Auth::id(),
+            ]);
 
-        return redirect()->route('workflows.edit', $workflow)->with('success', 'Workflow updated successfully.');
+            return redirect()->route('workflows.edit', $workflow)->with('success', 'Workflow updated successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                            ->withInput()
+                            ->withErrors(['error' => 'Failed to update workflow: ' . $e->getMessage()]);
+        }
     }
 
     public function destroy(Workflow $workflow): RedirectResponse
     {
-        // Create history records for all assignments before deletion
-        foreach ($workflow->assignments as $assignment) {
-            WorkflowHistory::create([
-                'workflow_id' => $workflow->id,
-                'employee_id' => $assignment->employee_id,
-                'employee_workflow_id' => $assignment->id,
-                'action' => 'workflow_deleted',
-                'details' => "Workflow '{$workflow->name}' was deleted",
-                'created_by' => Auth::id(),
-            ]);
+        try {
+            // Create history records for all assignments before deletion
+            foreach ($workflow->assignments as $assignment) {
+                WorkflowHistory::create([
+                    'workflow_id' => $workflow->id,
+                    'employee_id' => $assignment->employee_id,
+                    'employee_workflow_id' => $assignment->id,
+                    'action' => 'workflow_deleted',
+                    'details' => "Workflow '{$workflow->name}' was deleted",
+                    'created_by' => Auth::id(),
+                ]);
+            }
+
+            // The database constraints will handle deleting pivot records
+            $workflow->update(['deleted_by' => Auth::id()]);
+            $workflow->delete();
+
+            return redirect()->route('workflows.index')
+                            ->with('success', 'Workflow deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                            ->withErrors(['error' => 'Failed to delete workflow: ' . $e->getMessage()]);
         }
-
-        // The database constraints will handle deleting pivot records
-        $workflow->update(['deleted_by' => Auth::id()]);
-        $workflow->delete();
-
-        return redirect()->route('workflows.index')
-                        ->with('success', 'Workflow deleted successfully.');
     }
 
     /**
