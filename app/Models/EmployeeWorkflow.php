@@ -74,7 +74,13 @@ class EmployeeWorkflow extends Model
         $this->load(['workflow.documentTypes', 'employee.documents']);
         
         $requiredDocumentTypeIds = $this->workflow->documentTypes->pluck('id')->toArray();
-        $employeeDocumentTypeIds = $this->employee->documents->pluck('document_type_id')->toArray();
+        
+        // Only count valid documents (not expired, not deleted)
+        $employeeDocumentTypeIds = $this->employee->documents
+            ->whereNull('deleted_at')
+            ->where('expiry_date', '>', now())
+            ->pluck('document_type_id')
+            ->toArray();
         
         if (empty($requiredDocumentTypeIds)) {
             return 0;
@@ -98,7 +104,13 @@ class EmployeeWorkflow extends Model
         $this->load(['workflow.documentTypes', 'employee.documents']);
         
         $requiredDocumentTypeIds = $this->workflow->documentTypes->pluck('id')->toArray();
-        $employeeDocumentTypeIds = $this->employee->documents->pluck('document_type_id')->toArray();
+        
+        // Only count valid documents (not expired, not deleted)
+        $employeeDocumentTypeIds = $this->employee->documents
+            ->whereNull('deleted_at')
+            ->where('expiry_date', '>', now())
+            ->pluck('document_type_id')
+            ->toArray();
         
         $missingDocTypes = [];
         foreach ($this->workflow->documentTypes as $docType) {

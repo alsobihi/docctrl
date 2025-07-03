@@ -89,7 +89,7 @@
                         @foreach($employeeWorkflow->history->sortByDesc('created_at') as $event)
                             <div class="relative flex items-start">
                                 <!-- Timeline Icon -->
-                                <div class="absolute left-0 mt-1">
+                                <div class="absolute left-0 mt-1.5">
                                     <div class="w-9 h-9 rounded-full flex items-center justify-center 
                                         {{ $event->action === 'started' ? 'bg-blue-100' : 
                                            ($event->action === 'completed' ? 'bg-green-100' : 

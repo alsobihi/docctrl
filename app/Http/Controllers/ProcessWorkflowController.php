@@ -39,7 +39,11 @@ class ProcessWorkflowController extends Controller
 
     public function show(Employee $employee, Workflow $workflow): View
     {
-        $employee->load('documents');
+        $employee->load(['documents' => function($query) {
+            $query->whereNull('deleted_at')
+                  ->where('expiry_date', '>', now());
+        }]);
+        
         $workflow->load('documentTypes');
 
         $employeeWorkflow = EmployeeWorkflow::firstOrCreate(
@@ -62,7 +66,11 @@ class ProcessWorkflowController extends Controller
         $employee->checkAndUpdateWorkflowStatus();
         $employeeWorkflow->refresh();
 
-        $employeeDocumentTypeIds = $employee->documents->pluck('document_type_id')->toArray();
+        // Get current valid document type IDs
+        $employeeDocumentTypeIds = $employee->documents
+            ->where('expiry_date', '>', now())
+            ->pluck('document_type_id')
+            ->toArray();
 
         $checklist = $workflow->documentTypes->map(function ($requiredDocType) use ($employeeDocumentTypeIds) {
             return (object) [

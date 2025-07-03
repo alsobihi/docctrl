@@ -211,12 +211,25 @@ class Employee extends Model
             return;
         }
 
-        $currentDocumentIds = $this->documents()->pluck('document_type_id');
+        $currentDocumentTypeIds = $this->documents()
+            ->whereNull('deleted_at')
+            ->where('expiry_date', '>', now())
+            ->pluck('document_type_id')
+            ->toArray();
 
         foreach ($inProgressWorkflows as $employeeWorkflow) {
-            $requiredIds = $employeeWorkflow->workflow->documentTypes->pluck('id');
+            $requiredIds = $employeeWorkflow->workflow->documentTypes->pluck('id')->toArray();
+            
+            // Check if all required document types are present
+            $allDocumentsPresent = true;
+            foreach ($requiredIds as $requiredId) {
+                if (!in_array($requiredId, $currentDocumentTypeIds)) {
+                    $allDocumentsPresent = false;
+                    break;
+                }
+            }
 
-            if ($requiredIds->diff($currentDocumentIds)->isEmpty()) {
+            if ($allDocumentsPresent) {
                 // All required documents are present - complete the workflow
                 $employeeWorkflow->update([
                     'status' => 'completed',
