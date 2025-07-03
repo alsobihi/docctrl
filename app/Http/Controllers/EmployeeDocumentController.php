@@ -10,7 +10,6 @@ use App\Services\ValidityRuleService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
@@ -60,11 +59,11 @@ class EmployeeDocumentController extends Controller {
             'created_by' => Auth::id(),
         ]);
         
-        // Create history record for document addition
-        $this->createDocumentHistoryRecord($employee, $document, 'document_added');
-        
         // Update workflow status
         $employee->checkAndUpdateWorkflowStatus();
+        
+        // Create history record for document addition
+        $this->createDocumentHistoryRecord($employee, $document, 'document_added');
         
         if ($request->has('workflow_id')) {
             return redirect()->route('process-workflow.show', ['employee' => $employee->id, 'workflow' => $request->workflow_id])
@@ -117,18 +116,16 @@ class EmployeeDocumentController extends Controller {
                 ->where('workflow_id', $workflow->id)
                 ->first();
             
-            if ($employeeWorkflow) {
-                WorkflowHistory::create([
-                    'workflow_id' => $workflow->id,
-                    'employee_id' => $employee->id,
-                    'employee_workflow_id' => $employeeWorkflow->id,
-                    'action' => $action,
-                    'details' => "{$document->documentType->name} was " . ($action === 'document_added' ? 'added' : 'deleted'),
-                    'document_type_id' => $document->document_type_id,
-                    'document_id' => $document->id,
-                    'created_by' => Auth::id(),
-                ]);
-            }
+            WorkflowHistory::create([
+                'workflow_id' => $workflow->id,
+                'employee_id' => $employee->id,
+                'employee_workflow_id' => $employeeWorkflow ? $employeeWorkflow->id : null,
+                'action' => $action,
+                'details' => "{$document->documentType->name} was " . ($action === 'document_added' ? 'added' : 'deleted'),
+                'document_type_id' => $document->document_type_id,
+                'document_id' => $document->id,
+                'created_by' => Auth::id(),
+            ]);
         }
     }
 }

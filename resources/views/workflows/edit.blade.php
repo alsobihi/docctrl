@@ -6,18 +6,6 @@
             </div>
         @endif
 
-        @if ($errors->any())
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                <strong class="font-bold">Error!</strong>
-                <span class="block sm:inline">Please check the form for errors.</span>
-                <ul class="mt-2 list-disc list-inside">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Left Side: Workflow Details -->
             <div class="lg:col-span-1" x-data="{ scope: '{{ old('scope', $workflow->plant_id ? 'plant' : ($workflow->project_id ? 'project' : 'global')) }}' }">
@@ -29,12 +17,10 @@
                         <div>
                             <x-input-label for="name" :value="__('Workflow Name')" />
                             <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name', $workflow->name)" required />
-                            <x-input-error :messages="$errors->get('name')" class="mt-2" />
                         </div>
                         <div class="mt-4">
                             <x-input-label for="description" :value="__('Description')" />
                             <textarea name="description" id="description" rows="3" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm">{{ old('description', $workflow->description) }}</textarea>
-                            <x-input-error :messages="$errors->get('description')" class="mt-2" />
                         </div>
 
                         <!-- Scope Selection -->
@@ -45,31 +31,22 @@
                                 <label class="flex items-center"><input type="radio" name="scope" value="plant" x-model="scope" class="form-radio"> <span class="ml-2">Plant</span></label>
                                 <label class="flex items-center"><input type="radio" name="scope" value="project" x-model="scope" class="form-radio"> <span class="ml-2">Project</span></label>
                             </div>
-                            <x-input-error :messages="$errors->get('scope')" class="mt-2" />
                         </div>
 
                         <!-- Plant Dropdown -->
                         <div x-show="scope === 'plant'" x-transition class="mt-4">
                             <x-input-label for="plant_id" :value="__('Select Plant')" />
                             <select name="plant_id" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm">
-                                <option value="">-- Select a Plant --</option>
-                                @foreach($plants as $plant) 
-                                    <option value="{{ $plant->id }}" @selected(old('plant_id', $workflow->plant_id) == $plant->id)>{{ $plant->name }}</option>
-                                @endforeach
+                                @foreach($plants as $plant) <option value="{{ $plant->id }}" @selected(old('plant_id', $workflow->plant_id) == $plant->id)>{{ $plant->name }}</option> @endforeach
                             </select>
-                            <x-input-error :messages="$errors->get('plant_id')" class="mt-2" />
                         </div>
 
                         <!-- Project Dropdown -->
                         <div x-show="scope === 'project'" x-transition class="mt-4">
                             <x-input-label for="project_id" :value="__('Select Project')" />
                             <select name="project_id" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm">
-                                <option value="">-- Select a Project --</option>
-                                @foreach($projects as $project) 
-                                    <option value="{{ $project->id }}" @selected(old('project_id', $workflow->project_id) == $project->id)>{{ $project->name }}</option>
-                                @endforeach
+                                @foreach($projects as $project) <option value="{{ $project->id }}" @selected(old('project_id', $workflow->project_id) == $project->id)>{{ $project->name }}</option> @endforeach
                             </select>
-                            <x-input-error :messages="$errors->get('project_id')" class="mt-2" />
                         </div>
 
                         <!-- Workflow Behavior Settings -->
@@ -79,31 +56,25 @@
                             <!-- Is Reopenable Checkbox -->
                             <div class="block mt-4">
                                 <label for="is_reopenable" class="inline-flex items-center">
-                                    <input type="hidden" name="is_reopenable" value="0">
-                                    <input id="is_reopenable" type="checkbox" name="is_reopenable" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ old('is_reopenable', $workflow->is_reopenable) ? 'checked' : '' }}>
+                                    <x-checkbox id="is_reopenable" name="is_reopenable" :value="1" :checked="old('is_reopenable', $workflow->is_reopenable)" />
                                     <span class="ms-2 text-sm text-gray-600">{{ __('This workflow can be reopened') }}</span>
                                 </label>
-                                <x-input-error :messages="$errors->get('is_reopenable')" class="mt-2" />
                             </div>
                             
                             <!-- Auto Reopen on Expiry -->
                             <div class="block mt-4">
                                 <label for="auto_reopen_on_expiry" class="inline-flex items-center">
-                                    <input type="hidden" name="auto_reopen_on_expiry" value="0">
-                                    <input id="auto_reopen_on_expiry" type="checkbox" name="auto_reopen_on_expiry" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ old('auto_reopen_on_expiry', $workflow->auto_reopen_on_expiry) ? 'checked' : '' }}>
+                                    <x-checkbox id="auto_reopen_on_expiry" name="auto_reopen_on_expiry" :value="1" :checked="old('auto_reopen_on_expiry', $workflow->auto_reopen_on_expiry)" />
                                     <span class="ms-2 text-sm text-gray-600">{{ __('Automatically reopen when a document expires') }}</span>
                                 </label>
-                                <x-input-error :messages="$errors->get('auto_reopen_on_expiry')" class="mt-2" />
                             </div>
                             
                             <!-- Auto Reopen on Deletion -->
                             <div class="block mt-4">
                                 <label for="auto_reopen_on_deletion" class="inline-flex items-center">
-                                    <input type="hidden" name="auto_reopen_on_deletion" value="0">
-                                    <input id="auto_reopen_on_deletion" type="checkbox" name="auto_reopen_on_deletion" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ old('auto_reopen_on_deletion', $workflow->auto_reopen_on_deletion) ? 'checked' : '' }}>
+                                    <x-checkbox id="auto_reopen_on_deletion" name="auto_reopen_on_deletion" :value="1" :checked="old('auto_reopen_on_deletion', $workflow->auto_reopen_on_deletion)" />
                                     <span class="ms-2 text-sm text-gray-600">{{ __('Automatically reopen when a document is deleted') }}</span>
                                 </label>
-                                <x-input-error :messages="$errors->get('auto_reopen_on_deletion')" class="mt-2" />
                             </div>
                             
                             <!-- Notification Days Before -->
@@ -111,7 +82,6 @@
                                 <x-input-label for="notification_days_before" :value="__('Send notifications before expiry (days)')" />
                                 <x-text-input id="notification_days_before" class="block mt-1 w-full" type="number" name="notification_days_before" :value="old('notification_days_before', $workflow->notification_days_before ?? 30)" min="1" max="90" />
                                 <p class="text-xs text-slate-500 mt-1">Set how many days before document expiry to send notifications</p>
-                                <x-input-error :messages="$errors->get('notification_days_before')" class="mt-2" />
                             </div>
                         </div>
 

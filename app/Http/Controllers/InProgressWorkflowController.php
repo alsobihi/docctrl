@@ -10,13 +10,12 @@ class InProgressWorkflowController extends Controller
 {
     public function index(): View
     {
-        $user = Auth::user();
         $query = EmployeeWorkflow::with(['employee', 'workflow'])
             ->where('status', 'in_progress');
 
-        if ($user->role === 'manager') {
-            $query->whereHas('employee', function ($q) use ($user) {
-                $q->where('plant_id', $user->plant_id);
+        if (Auth::user()->role === 'manager') {
+            $query->whereHas('employee', function ($q) {
+                $q->where('plant_id', Auth::user()->plant_id);
             });
         }
 

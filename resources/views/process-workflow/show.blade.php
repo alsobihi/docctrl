@@ -76,7 +76,7 @@
         </div>
 
         <!-- Workflow History -->
-        @if(isset($employeeWorkflow->history) && $employeeWorkflow->history->count() > 0)
+        @if($employeeWorkflow->history && $employeeWorkflow->history->count() > 0)
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-8">
                 <h2 class="text-xl font-semibold text-slate-800 mb-6">Workflow History</h2>
                 
@@ -89,7 +89,7 @@
                         @foreach($employeeWorkflow->history->sortByDesc('created_at') as $event)
                             <div class="relative flex items-start">
                                 <!-- Timeline Icon -->
-                                <div class="absolute left-0 mt-1.5">
+                                <div class="absolute left-0 mt-1">
                                     <div class="w-9 h-9 rounded-full flex items-center justify-center 
                                         {{ $event->action === 'started' ? 'bg-blue-100' : 
                                            ($event->action === 'completed' ? 'bg-green-100' : 

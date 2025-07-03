@@ -185,7 +185,6 @@ class Workflow extends Model
                 WorkflowHistory::create([
                     'workflow_id' => $employeeWorkflow->workflow_id,
                     'employee_id' => $employee->id,
-                    'employee_workflow_id' => $employeeWorkflow->id,
                     'action' => 'reopened',
                     'details' => "Workflow reopened automatically because {$documentType->name} was {$reason}",
                     'created_by' => $employeeWorkflow->created_by,
