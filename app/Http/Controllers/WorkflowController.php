@@ -44,18 +44,16 @@ class WorkflowController extends Controller
                 'notification_days_before' => 'nullable|integer|min:1|max:90',
             ]);
 
-            // Log the validated data for debugging
-            Log::info('Validated workflow data:', $validated);
-
+            // Create the workflow with the validated data
             $workflow = Workflow::create([
-                'name' => $request->name,
-                'description' => $request->description,
+                'name' => $validated['name'],
+                'description' => $validated['description'],
                 'is_reopenable' => $request->boolean('is_reopenable'),
                 'auto_reopen_on_expiry' => $request->boolean('auto_reopen_on_expiry'),
                 'auto_reopen_on_deletion' => $request->boolean('auto_reopen_on_deletion'),
-                'notification_days_before' => $request->notification_days_before,
-                'plant_id' => $request->scope === 'plant' ? $request->plant_id : null,
-                'project_id' => $request->scope === 'project' ? $request->project_id : null,
+                'notification_days_before' => $validated['notification_days_before'],
+                'plant_id' => $validated['scope'] === 'plant' ? $validated['plant_id'] : null,
+                'project_id' => $validated['scope'] === 'project' ? $validated['project_id'] : null,
                 'created_by' => Auth::id(),
             ]);
 
@@ -99,18 +97,15 @@ class WorkflowController extends Controller
                 'notification_days_before' => 'nullable|integer|min:1|max:90',
             ]);
 
-            // Log the validated data for debugging
-            Log::info('Validated workflow update data:', $validated);
-
             $workflow->update([
-                'name' => $request->name,
-                'description' => $request->description,
+                'name' => $validated['name'],
+                'description' => $validated['description'],
                 'is_reopenable' => $request->boolean('is_reopenable'),
                 'auto_reopen_on_expiry' => $request->boolean('auto_reopen_on_expiry'),
                 'auto_reopen_on_deletion' => $request->boolean('auto_reopen_on_deletion'),
-                'notification_days_before' => $request->notification_days_before,
-                'plant_id' => $request->scope === 'plant' ? $request->plant_id : null,
-                'project_id' => $request->scope === 'project' ? $request->project_id : null,
+                'notification_days_before' => $validated['notification_days_before'],
+                'plant_id' => $validated['scope'] === 'plant' ? $validated['plant_id'] : null,
+                'project_id' => $validated['scope'] === 'project' ? $validated['project_id'] : null,
                 'updated_by' => Auth::id(),
             ]);
 
