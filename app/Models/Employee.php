@@ -1,8 +1,5 @@
 <?php
 
-// app/Models/Employee.php
-// --- Employee Model ---
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,9 +19,36 @@ class Employee extends Model
         'last_name',
         'employee_code',
         'plant_id',
+        'profile_photo_path',
+        'phone',
+        'email',
+        'address',
+        'date_of_birth',
+        'nationality',
+        'position',
+        'department',
+        'hire_date',
+        'employment_status',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'emergency_contact_relationship',
+        'salary',
+        'contract_type',
+        'contract_end_date',
+        'notes',
+        'skills',
+        'badge_number',
         'created_by',
         'updated_by',
         'deleted_by',
+    ];
+
+    protected $casts = [
+        'date_of_birth' => 'date',
+        'hire_date' => 'date',
+        'contract_end_date' => 'date',
+        'skills' => 'array',
+        'salary' => 'decimal:2',
     ];
 
     /**
@@ -60,17 +84,118 @@ class Employee extends Model
     }
 
     public function assignedWorkflows()
-{
-    return $this->hasMany(EmployeeWorkflow::class);
-}
-
-
+    {
+        return $this->hasMany(EmployeeWorkflow::class);
+    }
 
     /**
-     * Checks all in-progress workflows for this employee and updates their
-     * status to 'completed' if all required documents are now present.
+     * Get the employee's full name
      */
-      /**
+    public function getFullNameAttribute(): string
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
+    /**
+     * Get the employee's profile photo URL
+     */
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        return $this->profile_photo_path ? asset('storage/' . $this->profile_photo_path) : null;
+    }
+
+    /**
+     * Get the employee's age
+     */
+    public function getAgeAttribute(): ?int
+    {
+        return $this->date_of_birth ? $this->date_of_birth->age : null;
+    }
+
+    /**
+     * Get years of service
+     */
+    public function getYearsOfServiceAttribute(): ?float
+    {
+        return $this->hire_date ? $this->hire_date->diffInYears(now()) : null;
+    }
+
+    /**
+     * Get employment status color
+     */
+    public function getStatusColorAttribute(): string
+    {
+        return match($this->employment_status) {
+            'active' => 'green',
+            'inactive' => 'yellow',
+            'terminated' => 'red',
+            default => 'gray'
+        };
+    }
+
+    /**
+     * Get contract status
+     */
+    public function getContractStatusAttribute(): string
+    {
+        if (!$this->contract_end_date) {
+            return 'permanent';
+        }
+
+        if ($this->contract_end_date->isPast()) {
+            return 'expired';
+        }
+
+        if ($this->contract_end_date->isBetween(now(), now()->addDays(30))) {
+            return 'expiring_soon';
+        }
+
+        return 'active';
+    }
+
+    /**
+     * Scope for active employees
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('employment_status', 'active');
+    }
+
+    /**
+     * Scope for employees by department
+     */
+    public function scopeByDepartment($query, $department)
+    {
+        return $query->where('department', $department);
+    }
+
+    /**
+     * Scope for employees by position
+     */
+    public function scopeByPosition($query, $position)
+    {
+        return $query->where('position', $position);
+    }
+
+    /**
+     * Get expired documents count
+     */
+    public function getExpiredDocumentsCountAttribute(): int
+    {
+        return $this->documents()->where('expiry_date', '<', now())->count();
+    }
+
+    /**
+     * Get expiring documents count (next 30 days)
+     */
+    public function getExpiringDocumentsCountAttribute(): int
+    {
+        return $this->documents()
+            ->whereBetween('expiry_date', [now(), now()->addDays(30)])
+            ->count();
+    }
+
+    /**
      * Checks all in-progress workflows for this employee and updates their
      * status to 'completed' if all required documents are now present.
      */
@@ -78,7 +203,7 @@ class Employee extends Model
     {
         $inProgressWorkflows = $this->assignedWorkflows()
             ->where('status', 'in_progress')
-            ->with('workflow.documentTypes') // Eager load relations
+            ->with('workflow.documentTypes')
             ->get();
 
         if ($inProgressWorkflows->isEmpty()) {
@@ -91,7 +216,6 @@ class Employee extends Model
             $requiredIds = $employeeWorkflow->workflow->documentTypes->pluck('id');
 
             if ($requiredIds->diff($currentDocumentIds)->isEmpty()) {
-                // All required documents are present
                 $employeeWorkflow->update([
                     'status' => 'completed',
                     'completed_at' => Carbon::now(),
@@ -99,7 +223,4 @@ class Employee extends Model
             }
         }
     }
-
-
-
 }
