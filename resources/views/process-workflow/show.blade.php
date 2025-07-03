@@ -76,7 +76,7 @@
         </div>
 
         <!-- Workflow History -->
-        @if($employeeWorkflow->history && $employeeWorkflow->history->count() > 0)
+        @if(isset($employeeWorkflow->history) && $employeeWorkflow->history->count() > 0)
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-8">
                 <h2 class="text-xl font-semibold text-slate-800 mb-6">Workflow History</h2>
                 

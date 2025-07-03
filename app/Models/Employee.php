@@ -211,19 +211,21 @@ class Employee extends Model
             return;
         }
 
-        $currentDocumentTypeIds = $this->documents()
+        // Get valid documents (not deleted and not expired)
+        $validDocuments = $this->documents()
             ->whereNull('deleted_at')
             ->where('expiry_date', '>', now())
-            ->pluck('document_type_id')
-            ->toArray();
+            ->get();
+            
+        $validDocumentTypeIds = $validDocuments->pluck('document_type_id')->toArray();
 
         foreach ($inProgressWorkflows as $employeeWorkflow) {
-            $requiredIds = $employeeWorkflow->workflow->documentTypes->pluck('id')->toArray();
+            $requiredDocTypeIds = $employeeWorkflow->workflow->documentTypes->pluck('id')->toArray();
             
             // Check if all required document types are present
             $allDocumentsPresent = true;
-            foreach ($requiredIds as $requiredId) {
-                if (!in_array($requiredId, $currentDocumentTypeIds)) {
+            foreach ($requiredDocTypeIds as $requiredId) {
+                if (!in_array($requiredId, $validDocumentTypeIds)) {
                     $allDocumentsPresent = false;
                     break;
                 }
@@ -243,6 +245,24 @@ class Employee extends Model
                     'employee_workflow_id' => $employeeWorkflow->id,
                     'action' => 'completed',
                     'details' => 'All required documents have been collected',
+                    'created_by' => $employeeWorkflow->created_by,
+                ]);
+            } else if ($employeeWorkflow->status === 'completed') {
+                // If workflow was completed but now documents are missing, reopen it
+                $employeeWorkflow->update([
+                    'status' => 'in_progress',
+                    'completed_at' => null,
+                    'reopened_at' => Carbon::now(),
+                    'reopened_reason' => 'Required documents are missing or expired',
+                ]);
+                
+                // Create a history record for workflow reopening
+                WorkflowHistory::create([
+                    'workflow_id' => $employeeWorkflow->workflow_id,
+                    'employee_id' => $this->id,
+                    'employee_workflow_id' => $employeeWorkflow->id,
+                    'action' => 'reopened',
+                    'details' => 'Workflow reopened because required documents are missing or expired',
                     'created_by' => $employeeWorkflow->created_by,
                 ]);
             }

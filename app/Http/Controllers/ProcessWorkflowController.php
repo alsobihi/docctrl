@@ -39,6 +39,7 @@ class ProcessWorkflowController extends Controller
 
     public function show(Employee $employee, Workflow $workflow): View
     {
+        // Load only valid documents (not deleted and not expired)
         $employee->load(['documents' => function($query) {
             $query->whereNull('deleted_at')
                   ->where('expiry_date', '>', now());
@@ -63,12 +64,15 @@ class ProcessWorkflowController extends Controller
             ]);
         }
 
+        // Update workflow status to ensure it's accurate
         $employee->checkAndUpdateWorkflowStatus();
         $employeeWorkflow->refresh();
+        
+        // Load workflow history for display
+        $employeeWorkflow->load('history');
 
         // Get current valid document type IDs
         $employeeDocumentTypeIds = $employee->documents
-            ->where('expiry_date', '>', now())
             ->pluck('document_type_id')
             ->toArray();
 

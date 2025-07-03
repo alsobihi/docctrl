@@ -76,11 +76,11 @@ class EmployeeWorkflow extends Model
         $requiredDocumentTypeIds = $this->workflow->documentTypes->pluck('id')->toArray();
         
         // Only count valid documents (not expired, not deleted)
-        $employeeDocumentTypeIds = $this->employee->documents
+        $validDocuments = $this->employee->documents
             ->whereNull('deleted_at')
-            ->where('expiry_date', '>', now())
-            ->pluck('document_type_id')
-            ->toArray();
+            ->where('expiry_date', '>', now());
+            
+        $validDocumentTypeIds = $validDocuments->pluck('document_type_id')->toArray();
         
         if (empty($requiredDocumentTypeIds)) {
             return 0;
@@ -88,7 +88,7 @@ class EmployeeWorkflow extends Model
         
         $completedCount = 0;
         foreach ($requiredDocumentTypeIds as $docTypeId) {
-            if (in_array($docTypeId, $employeeDocumentTypeIds)) {
+            if (in_array($docTypeId, $validDocumentTypeIds)) {
                 $completedCount++;
             }
         }
@@ -103,18 +103,18 @@ class EmployeeWorkflow extends Model
     {
         $this->load(['workflow.documentTypes', 'employee.documents']);
         
-        $requiredDocumentTypeIds = $this->workflow->documentTypes->pluck('id')->toArray();
+        $requiredDocumentTypes = $this->workflow->documentTypes;
         
         // Only count valid documents (not expired, not deleted)
-        $employeeDocumentTypeIds = $this->employee->documents
+        $validDocuments = $this->employee->documents
             ->whereNull('deleted_at')
-            ->where('expiry_date', '>', now())
-            ->pluck('document_type_id')
-            ->toArray();
+            ->where('expiry_date', '>', now());
+            
+        $validDocumentTypeIds = $validDocuments->pluck('document_type_id')->toArray();
         
         $missingDocTypes = [];
-        foreach ($this->workflow->documentTypes as $docType) {
-            if (!in_array($docType->id, $employeeDocumentTypeIds)) {
+        foreach ($requiredDocumentTypes as $docType) {
+            if (!in_array($docType->id, $validDocumentTypeIds)) {
                 $missingDocTypes[] = $docType;
             }
         }
