@@ -10,6 +10,7 @@ use App\Services\ValidityRuleService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
