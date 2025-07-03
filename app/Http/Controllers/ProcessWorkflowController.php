@@ -17,7 +17,9 @@ class ProcessWorkflowController extends Controller
 {
     public function create(): View
     {
-        $employees = Employee::orderBy('first_name')->get();
+        $employees = Employee::where('employment_status', 'active')
+            ->orderBy('first_name')
+            ->get();
         // Workflows are now fetched dynamically via API, so we don't pass them here.
         return view('process-workflow.create', compact('employees'));
     }
