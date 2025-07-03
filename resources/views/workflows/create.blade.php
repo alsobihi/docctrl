@@ -43,40 +43,12 @@
                     </select>
                 </div>
 
-                <!-- Workflow Behavior Settings -->
-                <div class="mt-6 border-t border-slate-200 pt-6">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Workflow Behavior</h3>
-                    
-                    <!-- Is Reopenable Checkbox -->
-                    <div class="block mt-4">
-                        <label for="is_reopenable" class="inline-flex items-center">
-                            <x-checkbox id="is_reopenable" name="is_reopenable" :checked="old('is_reopenable', true)" />
-                            <span class="ms-2 text-sm text-gray-600">{{ __('This workflow can be reopened') }}</span>
-                        </label>
-                    </div>
-                    
-                    <!-- Auto Reopen on Expiry -->
-                    <div class="block mt-4">
-                        <label for="auto_reopen_on_expiry" class="inline-flex items-center">
-                            <x-checkbox id="auto_reopen_on_expiry" name="auto_reopen_on_expiry" :checked="old('auto_reopen_on_expiry', false)" />
-                            <span class="ms-2 text-sm text-gray-600">{{ __('Automatically reopen when a document expires') }}</span>
-                        </label>
-                    </div>
-                    
-                    <!-- Auto Reopen on Deletion -->
-                    <div class="block mt-4">
-                        <label for="auto_reopen_on_deletion" class="inline-flex items-center">
-                            <x-checkbox id="auto_reopen_on_deletion" name="auto_reopen_on_deletion" :checked="old('auto_reopen_on_deletion', false)" />
-                            <span class="ms-2 text-sm text-gray-600">{{ __('Automatically reopen when a document is deleted') }}</span>
-                        </label>
-                    </div>
-                    
-                    <!-- Notification Days Before -->
-                    <div class="mt-4">
-                        <x-input-label for="notification_days_before" :value="__('Send notifications before expiry (days)')" />
-                        <x-text-input id="notification_days_before" class="block mt-1 w-full" type="number" name="notification_days_before" :value="old('notification_days_before', 30)" min="1" max="90" />
-                        <p class="text-xs text-slate-500 mt-1">Set how many days before document expiry to send notifications</p>
-                    </div>
+                <!-- Is Reopenable Checkbox -->
+                <div class="block mt-4">
+                    <label for="is_reopenable" class="inline-flex items-center">
+                        <x-checkbox id="is_reopenable" name="is_reopenable" :checked="old('is_reopenable')" />
+                        <span class="ms-2 text-sm text-gray-600">{{ __('This workflow can be re-opened automatically') }}</span>
+                    </label>
                 </div>
 
                 <!-- Action Buttons -->
