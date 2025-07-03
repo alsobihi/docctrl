@@ -13,8 +13,6 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
         <!-- Scripts -->
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://unpkg.com/lucide-dev@latest" defer></script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <style>
@@ -109,14 +107,5 @@
                 {{ $slot }}
             </main>
         </div>
-        <script>
-            // This is a workaround for the lucide icons not rendering immediately.
-            // In a real app, you might handle this more robustly.
-            setTimeout(() => {
-                if (window.lucide) {
-                    window.lucide.createIcons();
-                }
-            }, 100);
-        </script>
     </body>
 </html>
