@@ -19,8 +19,8 @@ return new class extends Migration
             $table->nullableMorphs('recipient'); // For tracking who was notified
             $table->timestamps();
             
-            // Prevent duplicate notifications
-            $table->unique(['document_id', 'notification_type']);
+            // Prevent duplicate notifications with a shorter index name
+            $table->unique(['document_id', 'notification_type'], 'doc_expiry_notif_unique');
         });
     }
 
