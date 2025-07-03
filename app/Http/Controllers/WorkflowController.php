@@ -37,16 +37,17 @@ class WorkflowController extends Controller
             'project_id' => 'required_if:scope,project|nullable|exists:projects,id',
         ]);
 
-        $workflow = Workflow::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'plant_id' => $request->scope === 'plant' ? $request->plant_id : null,
-            'project_id' => $request->scope === 'project' ? $request->project_id : null,
-            'created_by' => Auth::id(),
-        ]);
+         $workflow = Workflow::create([
+        'name' => $request->name,
+        'description' => $request->description,
+        'is_reopenable' => $request->boolean('is_reopenable'), // <-- Add this
+        'plant_id' => $request->scope === 'plant' ? $request->plant_id : null,
+        'project_id' => $request->scope === 'project' ? $request->project_id : null,
+        'created_by' => Auth::id(),
+    ]);
 
-        return redirect()->route('workflows.edit', $workflow)
-                         ->with('success', 'Workflow created successfully. Now add document steps.');
+    return redirect()->route('workflows.edit', $workflow)
+                     ->with('success', 'Workflow created successfully.');
     }
 
     public function edit(Workflow $workflow): View
@@ -70,16 +71,16 @@ class WorkflowController extends Controller
             'project_id' => 'required_if:scope,project|nullable|exists:projects,id',
         ]);
 
-        $workflow->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'plant_id' => $request->scope === 'plant' ? $request->plant_id : null,
-            'project_id' => $request->scope === 'project' ? $request->project_id : null,
-            'updated_by' => Auth::id(),
-        ]);
+         $workflow->update([
+        'name' => $request->name,
+        'description' => $request->description,
+        'is_reopenable' => $request->boolean('is_reopenable'), // <-- Add this
+        'plant_id' => $request->scope === 'plant' ? $request->plant_id : null,
+        'project_id' => $request->scope === 'project' ? $request->project_id : null,
+        'updated_by' => Auth::id(),
+    ]);
 
-        return redirect()->route('workflows.edit', $workflow)
-                         ->with('success', 'Workflow updated successfully.');
+    return redirect()->route('workflows.edit', $workflow)->with('success', 'Workflow updated successfully.');
     }
 
 

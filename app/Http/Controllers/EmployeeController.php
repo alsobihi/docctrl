@@ -115,4 +115,3 @@ class EmployeeController extends Controller
                          ->with('success', 'Employee deleted successfully.');
     }
 }
-

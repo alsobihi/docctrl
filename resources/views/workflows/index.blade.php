@@ -17,6 +17,8 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Scope</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Steps</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type</th>
+
                             <th class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
@@ -35,6 +37,14 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ $workflow->document_types_count }}</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+    @if($workflow->is_reopenable)
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-cyan-100 text-cyan-800">Re-openable</span>
+    @else
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800">One-time</span>
+    @endif
+</td>
+
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <a href="{{ route('workflows.edit', $workflow) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
                                     {{-- ... delete form ... --}}

@@ -18,11 +18,16 @@ class Workflow extends Model
     protected $fillable = [
         'name',
         'description',
-        'plant_id', // <-- Add this
-        'project_id', // <-- Add this
+        'is_reopenable', // <-- Add this
+        'plant_id',
+        'project_id',
         'created_by',
         'updated_by',
         'deleted_by',
+    ];
+
+    protected $casts = [
+        'is_reopenable' => 'boolean', // <-- Add this
     ];
 
     /**

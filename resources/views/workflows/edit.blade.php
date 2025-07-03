@@ -48,7 +48,12 @@
                                 @foreach($projects as $project) <option value="{{ $project->id }}" @selected(old('project_id', $workflow->project_id) == $project->id)>{{ $project->name }}</option> @endforeach
                             </select>
                         </div>
-
+<div class="mt-4">
+    <label for="is_reopenable" class="flex items-center">
+        <x-checkbox id="is_reopenable" name="is_reopenable" :value="1" :checked="old('is_reopenable', $workflow->is_reopenable)" />
+        <span class="ms-2 text-sm text-gray-600">{{ __('This workflow can be re-opened automatically') }}</span>
+    </label>
+</div>
                         <div class="flex items-center justify-end mt-6">
                             <x-primary-button>{{ __('Update Workflow') }}</x-primary-button>
                         </div>

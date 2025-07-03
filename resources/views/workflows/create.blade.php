@@ -4,10 +4,14 @@
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 max-w-2xl mx-auto">
             <form action="{{ route('workflows.store') }}" method="POST">
                 @csrf
+
+                <!-- Workflow Name -->
                 <div>
                     <x-input-label for="name" :value="__('Workflow Name')" />
                     <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus />
                 </div>
+
+                <!-- Description -->
                 <div class="mt-4">
                     <x-input-label for="description" :value="__('Description')" />
                     <textarea name="description" id="description" rows="3" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm">{{ old('description') }}</textarea>
@@ -39,6 +43,15 @@
                     </select>
                 </div>
 
+                <!-- Is Reopenable Checkbox -->
+                <div class="block mt-4">
+                    <label for="is_reopenable" class="inline-flex items-center">
+                        <x-checkbox id="is_reopenable" name="is_reopenable" :checked="old('is_reopenable')" />
+                        <span class="ms-2 text-sm text-gray-600">{{ __('This workflow can be re-opened automatically') }}</span>
+                    </label>
+                </div>
+
+                <!-- Action Buttons -->
                 <div class="flex items-center justify-end mt-6">
                     <a href="{{ route('workflows.index') }}" class="text-sm text-gray-600 hover:text-gray-900 mr-4">Cancel</a>
                     <x-primary-button>{{ __('Save and Add Steps') }}</x-primary-button>
