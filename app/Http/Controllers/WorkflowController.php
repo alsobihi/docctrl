@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class WorkflowController extends Controller
 {
@@ -30,19 +31,22 @@ class WorkflowController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'scope' => ['required', Rule::in(['global', 'plant', 'project'])],
-            'plant_id' => 'required_if:scope,plant|nullable|exists:plants,id',
-            'project_id' => 'required_if:scope,project|nullable|exists:projects,id',
-            'is_reopenable' => 'boolean',
-            'auto_reopen_on_expiry' => 'boolean',
-            'auto_reopen_on_deletion' => 'boolean',
-            'notification_days_before' => 'nullable|integer|min:1|max:90',
-        ]);
-
         try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'scope' => ['required', Rule::in(['global', 'plant', 'project'])],
+                'plant_id' => 'required_if:scope,plant|nullable|exists:plants,id',
+                'project_id' => 'required_if:scope,project|nullable|exists:projects,id',
+                'is_reopenable' => 'boolean',
+                'auto_reopen_on_expiry' => 'boolean',
+                'auto_reopen_on_deletion' => 'boolean',
+                'notification_days_before' => 'nullable|integer|min:1|max:90',
+            ]);
+
+            // Log the validated data for debugging
+            Log::info('Validated workflow data:', $validated);
+
             $workflow = Workflow::create([
                 'name' => $request->name,
                 'description' => $request->description,
@@ -58,6 +62,11 @@ class WorkflowController extends Controller
             return redirect()->route('workflows.edit', $workflow)
                             ->with('success', 'Workflow created successfully.');
         } catch (\Exception $e) {
+            Log::error('Error creating workflow: ' . $e->getMessage(), [
+                'request' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return redirect()->back()
                             ->withInput()
                             ->withErrors(['error' => 'Failed to create workflow: ' . $e->getMessage()]);
@@ -77,19 +86,22 @@ class WorkflowController extends Controller
 
     public function update(Request $request, Workflow $workflow): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'scope' => ['required', Rule::in(['global', 'plant', 'project'])],
-            'plant_id' => 'required_if:scope,plant|nullable|exists:plants,id',
-            'project_id' => 'required_if:scope,project|nullable|exists:projects,id',
-            'is_reopenable' => 'boolean',
-            'auto_reopen_on_expiry' => 'boolean',
-            'auto_reopen_on_deletion' => 'boolean',
-            'notification_days_before' => 'nullable|integer|min:1|max:90',
-        ]);
-
         try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'scope' => ['required', Rule::in(['global', 'plant', 'project'])],
+                'plant_id' => 'required_if:scope,plant|nullable|exists:plants,id',
+                'project_id' => 'required_if:scope,project|nullable|exists:projects,id',
+                'is_reopenable' => 'boolean',
+                'auto_reopen_on_expiry' => 'boolean',
+                'auto_reopen_on_deletion' => 'boolean',
+                'notification_days_before' => 'nullable|integer|min:1|max:90',
+            ]);
+
+            // Log the validated data for debugging
+            Log::info('Validated workflow update data:', $validated);
+
             $workflow->update([
                 'name' => $request->name,
                 'description' => $request->description,
@@ -104,6 +116,12 @@ class WorkflowController extends Controller
 
             return redirect()->route('workflows.edit', $workflow)->with('success', 'Workflow updated successfully.');
         } catch (\Exception $e) {
+            Log::error('Error updating workflow: ' . $e->getMessage(), [
+                'workflow_id' => $workflow->id,
+                'request' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return redirect()->back()
                             ->withInput()
                             ->withErrors(['error' => 'Failed to update workflow: ' . $e->getMessage()]);
@@ -132,6 +150,11 @@ class WorkflowController extends Controller
             return redirect()->route('workflows.index')
                             ->with('success', 'Workflow deleted successfully.');
         } catch (\Exception $e) {
+            Log::error('Error deleting workflow: ' . $e->getMessage(), [
+                'workflow_id' => $workflow->id,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return redirect()->back()
                             ->withErrors(['error' => 'Failed to delete workflow: ' . $e->getMessage()]);
         }

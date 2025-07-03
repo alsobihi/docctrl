@@ -78,25 +78,31 @@
                     <!-- Is Reopenable Checkbox -->
                     <div class="block mt-4">
                         <label for="is_reopenable" class="inline-flex items-center">
-                            <x-checkbox id="is_reopenable" name="is_reopenable" :checked="old('is_reopenable', true)" />
+                            <input type="hidden" name="is_reopenable" value="0">
+                            <input id="is_reopenable" type="checkbox" name="is_reopenable" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ old('is_reopenable', true) ? 'checked' : '' }}>
                             <span class="ms-2 text-sm text-gray-600">{{ __('This workflow can be reopened') }}</span>
                         </label>
+                        <x-input-error :messages="$errors->get('is_reopenable')" class="mt-2" />
                     </div>
                     
                     <!-- Auto Reopen on Expiry -->
                     <div class="block mt-4">
                         <label for="auto_reopen_on_expiry" class="inline-flex items-center">
-                            <x-checkbox id="auto_reopen_on_expiry" name="auto_reopen_on_expiry" :checked="old('auto_reopen_on_expiry', false)" />
+                            <input type="hidden" name="auto_reopen_on_expiry" value="0">
+                            <input id="auto_reopen_on_expiry" type="checkbox" name="auto_reopen_on_expiry" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ old('auto_reopen_on_expiry', false) ? 'checked' : '' }}>
                             <span class="ms-2 text-sm text-gray-600">{{ __('Automatically reopen when a document expires') }}</span>
                         </label>
+                        <x-input-error :messages="$errors->get('auto_reopen_on_expiry')" class="mt-2" />
                     </div>
                     
                     <!-- Auto Reopen on Deletion -->
                     <div class="block mt-4">
                         <label for="auto_reopen_on_deletion" class="inline-flex items-center">
-                            <x-checkbox id="auto_reopen_on_deletion" name="auto_reopen_on_deletion" :checked="old('auto_reopen_on_deletion', false)" />
+                            <input type="hidden" name="auto_reopen_on_deletion" value="0">
+                            <input id="auto_reopen_on_deletion" type="checkbox" name="auto_reopen_on_deletion" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ old('auto_reopen_on_deletion', false) ? 'checked' : '' }}>
                             <span class="ms-2 text-sm text-gray-600">{{ __('Automatically reopen when a document is deleted') }}</span>
                         </label>
+                        <x-input-error :messages="$errors->get('auto_reopen_on_deletion')" class="mt-2" />
                     </div>
                     
                     <!-- Notification Days Before -->
