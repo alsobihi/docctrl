@@ -17,9 +17,7 @@
                             </option>
                         @endforeach
                     </select>
-                    <div x-show="fetchError" class="text-red-600 text-sm mt-1">
-                        There was an error fetching workflows. Please try again.
-                    </div>
+                    <div x-show="fetchError" class="text-red-600 text-sm mt-1" x-text="errorMessage"></div>
                 </div>
 
                 <div class="mt-4">
@@ -66,6 +64,7 @@
                 workflows: [],
                 isLoading: false,
                 fetchError: false,
+                errorMessage: '',
                 formSubmitted: false,
                 
                 init() {
@@ -83,6 +82,7 @@
                     
                     this.isLoading = true;
                     this.fetchError = false;
+                    this.errorMessage = '';
                     this.workflows = [];
                     this.selectedWorkflow = '';
                     
@@ -100,6 +100,10 @@
                         return response.json();
                     })
                     .then(data => {
+                        if (data.error) {
+                            throw new Error(data.error);
+                        }
+                        
                         this.workflows = data;
                         this.isLoading = false;
                         
@@ -112,6 +116,7 @@
                         console.error('Error fetching workflows:', error);
                         this.isLoading = false;
                         this.fetchError = true;
+                        this.errorMessage = 'There was an error fetching workflows. Please try again.';
                     });
                 }
             }
