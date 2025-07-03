@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\Workflow;
 use App\Models\EmployeeWorkflow;
+use App\Models\WorkflowHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -45,6 +46,18 @@ class ProcessWorkflowController extends Controller
             ['employee_id' => $employee->id, 'workflow_id' => $workflow->id],
             ['status' => 'in_progress', 'created_by' => Auth::id()]
         );
+
+        // Create a history record if this is a new workflow assignment
+        if ($employeeWorkflow->wasRecentlyCreated) {
+            WorkflowHistory::create([
+                'workflow_id' => $workflow->id,
+                'employee_id' => $employee->id,
+                'employee_workflow_id' => $employeeWorkflow->id,
+                'action' => 'started',
+                'details' => "Workflow started for {$employee->full_name}",
+                'created_by' => Auth::id(),
+            ]);
+        }
 
         $employee->checkAndUpdateWorkflowStatus();
         $employeeWorkflow->refresh();

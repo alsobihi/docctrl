@@ -12,7 +12,9 @@
                             class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                         <option value="">-- Select an Employee --</option>
                         @foreach ($employees as $employee)
-                            <option value="{{ $employee->id }}">{{ $employee->first_name }} {{ $employee->last_name }} ({{ $employee->employee_code }})</option>
+                            <option value="{{ $employee->id }}" {{ request('employee_id') == $employee->id ? 'selected' : '' }}>
+                                {{ $employee->first_name }} {{ $employee->last_name }} ({{ $employee->employee_code }})
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -38,7 +40,7 @@
 
                 <div class="flex items-center justify-end mt-6">
                     <a href="{{ route('dashboard') }}" class="text-sm text-gray-600 hover:text-gray-900 mr-4">Cancel</a>
-                    <x-primary-button x-bind:disabled="!selectedEmployee || isLoading">
+                    <x-primary-button x-bind:disabled="!selectedEmployee || !selectedWorkflow || isLoading">
                         {{ __('Generate Checklist') }}
                     </x-primary-button>
                 </div>
@@ -49,18 +51,27 @@
     <script>
         function workflowForm() {
             return {
-                selectedEmployee: '',
+                selectedEmployee: '{{ request('employee_id') }}',
+                selectedWorkflow: '',
                 workflows: [],
                 isLoading: false,
+                init() {
+                    if (this.selectedEmployee) {
+                        this.fetchWorkflows();
+                    }
+                },
                 fetchWorkflows() {
                     if (!this.selectedEmployee) {
                         this.workflows = [];
+                        this.selectedWorkflow = '';
                         return;
                     }
+                    
                     this.isLoading = true;
                     this.workflows = [];
-                    let url = `/employees/${this.selectedEmployee}/relevant-workflows`;
-                    fetch(url, {
+                    this.selectedWorkflow = '';
+                    
+                    fetch(`/employees/${this.selectedEmployee}/relevant-workflows`, {
                         headers: {
                             'Accept': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -73,10 +84,17 @@
                     .then(data => {
                         this.workflows = data;
                         this.isLoading = false;
+                        
+                        // If there's only one workflow, select it automatically
+                        if (this.workflows.length === 1) {
+                            this.selectedWorkflow = this.workflows[0].id;
+                            this.$refs.workflowSelect.value = this.selectedWorkflow;
+                        }
                     })
-                    .catch(() => {
+                    .catch(error => {
+                        console.error('Error fetching workflows:', error);
                         this.isLoading = false;
-                        alert('An error occurred while fetching workflows.');
+                        alert('An error occurred while fetching workflows. Please try again.');
                     });
                 }
             }
